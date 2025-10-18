@@ -11,7 +11,7 @@ header {
 }
 
 main {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -97,4 +97,12 @@ nav button {
     text-overflow: ellipsis;
     white-space: nowrap;
     flex: 1;
+}
+
+.kv-key {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 5px;
 }
