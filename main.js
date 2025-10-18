@@ -1,9 +1,9 @@
-const { app, BrowserWindow } = require('electron');
-const path = require('path');
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const fs = require('fs');
+const { app, BrowserWindow } = require("electron");
+const path = require("path");
+const express = require("express");
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const fs = require("fs");
 
 let mainWindow;
 let server;
@@ -22,18 +22,18 @@ function createWindow() {
   const serverApp = express();
   serverApp.use(cors());
   serverApp.use(bodyParser.json());
-  serverApp.use(express.static(path.join(__dirname, '.'))); // Servir archivos estáticos
+  serverApp.use(express.static(path.join(__dirname, "."))); // Servir archivos estáticos
 
-  const DATA_DIR = path.join(__dirname, 'data');
+  const DATA_DIR = path.join(__dirname, "data");
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR);
   }
 
-  const projectsFile = path.join(DATA_DIR, 'projects.json');
+  const projectsFile = path.join(DATA_DIR, "projects.json");
 
   function readProjects() {
     if (fs.existsSync(projectsFile)) {
-      return JSON.parse(fs.readFileSync(projectsFile, 'utf8'));
+      return JSON.parse(fs.readFileSync(projectsFile, "utf8"));
     }
     return [];
   }
@@ -43,23 +43,23 @@ function createWindow() {
   }
 
   // Rutas
-  serverApp.get('/api/projects', (req, res) => {
+  serverApp.get("/api/projects", (req, res) => {
     res.json(readProjects());
   });
 
-  serverApp.post('/api/projects', (req, res) => {
+  serverApp.post("/api/projects", (req, res) => {
     const { name } = req.body;
     const projects = readProjects();
     if (!projects.includes(name)) {
       projects.push(name);
       writeProjects(projects);
-      res.status(201).json({ message: 'Proyecto creado' });
+      res.status(201).json({ message: "Proyecto creado" });
     } else {
-      res.status(400).json({ message: 'Proyecto ya existe' });
+      res.status(400).json({ message: "Proyecto ya existe" });
     }
   });
 
-  serverApp.put('/api/projects/:oldName', (req, res) => {
+  serverApp.put("/api/projects/:oldName", (req, res) => {
     const { oldName } = req.params;
     const { newName } = req.body;
     const projects = readProjects();
@@ -78,95 +78,95 @@ function createWindow() {
       if (fs.existsSync(oldKv)) {
         fs.renameSync(oldKv, newKv);
       }
-      res.json({ message: 'Proyecto renombrado' });
+      res.json({ message: "Proyecto renombrado" });
     } else {
-      res.status(400).json({ message: 'Nombre inválido o ya existe' });
+      res.status(400).json({ message: "Nombre inválido o ya existe" });
     }
   });
 
-  serverApp.get('/api/projects/:name/notes', (req, res) => {
+  serverApp.get("/api/projects/:name/notes", (req, res) => {
     const { name } = req.params;
     const notesFile = path.join(DATA_DIR, `notes_${name}.txt`);
     if (fs.existsSync(notesFile)) {
-      res.send(fs.readFileSync(notesFile, 'utf8'));
+      res.send(fs.readFileSync(notesFile, "utf8"));
     } else {
-      res.send('');
+      res.send("");
     }
   });
 
-  serverApp.post('/api/projects/:name/notes', (req, res) => {
+  serverApp.post("/api/projects/:name/notes", (req, res) => {
     const { name } = req.params;
     const { content } = req.body;
     const notesFile = path.join(DATA_DIR, `notes_${name}.txt`);
     fs.writeFileSync(notesFile, content);
-    res.json({ message: 'Notas guardadas' });
+    res.json({ message: "Notas guardadas" });
   });
 
-  serverApp.get('/api/projects/:name/kv', (req, res) => {
+  serverApp.get("/api/projects/:name/kv", (req, res) => {
     const { name } = req.params;
     const kvFile = path.join(DATA_DIR, `kv_${name}.json`);
     if (fs.existsSync(kvFile)) {
-      res.json(JSON.parse(fs.readFileSync(kvFile, 'utf8')));
+      res.json(JSON.parse(fs.readFileSync(kvFile, "utf8")));
     } else {
       res.json({});
     }
   });
 
-  serverApp.post('/api/projects/:name/kv', (req, res) => {
+  serverApp.post("/api/projects/:name/kv", (req, res) => {
     const { name } = req.params;
     const { key, value } = req.body;
     const kvFile = path.join(DATA_DIR, `kv_${name}.json`);
     let kv = {};
     if (fs.existsSync(kvFile)) {
-      kv = JSON.parse(fs.readFileSync(kvFile, 'utf8'));
+      kv = JSON.parse(fs.readFileSync(kvFile, "utf8"));
     }
     kv[key] = value;
     fs.writeFileSync(kvFile, JSON.stringify(kv, null, 2));
-    res.json({ message: 'Llave-valor agregado' });
+    res.json({ message: "Llave-valor agregado" });
   });
 
-  serverApp.put('/api/projects/:name/kv/:key', (req, res) => {
+  serverApp.put("/api/projects/:name/kv/:key", (req, res) => {
     const { name, key } = req.params;
     const { value } = req.body;
     const kvFile = path.join(DATA_DIR, `kv_${name}.json`);
     if (fs.existsSync(kvFile)) {
-      let kv = JSON.parse(fs.readFileSync(kvFile, 'utf8'));
+      let kv = JSON.parse(fs.readFileSync(kvFile, "utf8"));
       if (kv.hasOwnProperty(key)) {
         kv[key] = value;
         fs.writeFileSync(kvFile, JSON.stringify(kv, null, 2));
-        res.json({ message: 'Llave-valor actualizado' });
+        res.json({ message: "Llave-valor actualizado" });
       } else {
-        res.status(404).json({ message: 'Llave no encontrada' });
+        res.status(404).json({ message: "Llave no encontrada" });
       }
     } else {
-      res.status(404).json({ message: 'Archivo no encontrado' });
+      res.status(404).json({ message: "Archivo no encontrado" });
     }
   });
 
-  serverApp.delete('/api/projects/:name/kv/:key', (req, res) => {
+  serverApp.delete("/api/projects/:name/kv/:key", (req, res) => {
     const { name, key } = req.params;
     const kvFile = path.join(DATA_DIR, `kv_${name}.json`);
     if (fs.existsSync(kvFile)) {
-      let kv = JSON.parse(fs.readFileSync(kvFile, 'utf8'));
+      let kv = JSON.parse(fs.readFileSync(kvFile, "utf8"));
       if (kv.hasOwnProperty(key)) {
         delete kv[key];
         fs.writeFileSync(kvFile, JSON.stringify(kv, null, 2));
-        res.json({ message: 'Llave-valor eliminado' });
+        res.json({ message: "Llave-valor eliminado" });
       } else {
-        res.status(404).json({ message: 'Llave no encontrada' });
+        res.status(404).json({ message: "Llave no encontrada" });
       }
     } else {
-      res.status(404).json({ message: 'Archivo no encontrado' });
+      res.status(404).json({ message: "Archivo no encontrado" });
     }
   });
 
   server = serverApp.listen(3000, () => {
-    console.log('Servidor corriendo en puerto 3000');
+    console.log("Servidor corriendo en puerto 3000");
   });
 
-  mainWindow.loadURL('http://localhost:3000');
+  mainWindow.loadURL("http://localhost:3000");
 
-  mainWindow.on('closed', () => {
+  mainWindow.on("closed", () => {
     mainWindow = null;
     if (server) {
       server.close();
@@ -174,15 +174,15 @@ function createWindow() {
   });
 }
 
-app.on('ready', createWindow);
+app.on("ready", createWindow);
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
     app.quit();
   }
 });
 
-app.on('activate', () => {
+app.on("activate", () => {
   if (mainWindow === null) {
     createWindow();
   }
