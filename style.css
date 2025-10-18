@@ -92,17 +92,22 @@ nav button {
 }
 
 .kv-value {
-    max-width: 300px;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+    overflow-x: auto;
     flex: 1;
 }
 
 .kv-key {
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+    overflow-x: auto;
     margin-right: 5px;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #c82333;
 }

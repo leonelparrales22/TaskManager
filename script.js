@@ -29,7 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const selectBtn = document.createElement("button");
         selectBtn.textContent = "Seleccionar";
         selectBtn.onclick = () => selectProject(project);
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "Editar";
+        editBtn.onclick = () => editProject(project);
         li.appendChild(selectBtn);
+        li.appendChild(editBtn);
         projectList.appendChild(li);
       });
     } catch (error) {
@@ -138,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
       kvList.innerHTML = "";
       Object.entries(kv).forEach(([key, value]) => {
         const li = document.createElement("li");
-                li.innerHTML = `<strong class="kv-key">${key}:</strong> <span class="kv-value">${value}</span> <button onclick="copyKv('${key}')">Copiar</button> <button onclick="editKv('${key}')">Editar</button> <button onclick="deleteKv('${key}')">Eliminar</button>`;
+                li.innerHTML = `<strong class="kv-key">${key}:</strong> <span class="kv-value">${value}</span> <button onclick="copyKv('${key}')">Copiar</button> <button onclick="editKv('${key}')">Editar</button> <button class="delete-btn" onclick="deleteKv('${key}')">Eliminar</button>`;
         kvList.appendChild(li);
       });
     } catch (error) {
@@ -212,6 +216,31 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       console.error("Error copiando:", error);
       alert("Error al copiar");
+    }
+  };
+
+  window.editProject = async (oldName) => {
+    const newName = prompt("Nuevo nombre para el proyecto:", oldName);
+    if (newName && newName !== oldName) {
+      try {
+        const response = await fetch(`/api/projects/${oldName}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ newName }),
+        });
+        if (response.ok) {
+          loadProjects();
+          if (currentProject === oldName) {
+            currentProject = newName;
+            currentProjectTitle.textContent = newName;
+          }
+        } else {
+          const data = await response.json();
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error("Error editando proyecto:", error);
+      }
     }
   };
 

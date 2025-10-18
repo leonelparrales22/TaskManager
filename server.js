@@ -49,6 +49,31 @@ app.post("/api/projects", (req, res) => {
   }
 });
 
+app.put("/api/projects/:oldName", (req, res) => {
+  const { oldName } = req.params;
+  const { newName } = req.body;
+  const projects = readProjects();
+  const index = projects.indexOf(oldName);
+  if (index !== -1 && !projects.includes(newName)) {
+    projects[index] = newName;
+    writeProjects(projects);
+    // Renombrar archivos
+    const oldNotes = path.join(DATA_DIR, `notes_${oldName}.txt`);
+    const newNotes = path.join(DATA_DIR, `notes_${newName}.txt`);
+    if (fs.existsSync(oldNotes)) {
+      fs.renameSync(oldNotes, newNotes);
+    }
+    const oldKv = path.join(DATA_DIR, `kv_${oldName}.json`);
+    const newKv = path.join(DATA_DIR, `kv_${newName}.json`);
+    if (fs.existsSync(oldKv)) {
+      fs.renameSync(oldKv, newKv);
+    }
+    res.json({ message: "Proyecto renombrado" });
+  } else {
+    res.status(400).json({ message: "Nombre inválido o ya existe" });
+  }
+});
+
 // Rutas para notas
 app.get("/api/projects/:name/notes", (req, res) => {
   const { name } = req.params;
