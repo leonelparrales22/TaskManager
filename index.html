@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Apuntes</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Gestor de Apuntes por Proyecto</h1>
+    </header>
+    <main>
+        <section id="projects">
+            <h2>Proyectos</h2>
+            <button id="new-project">Nuevo Proyecto</button>
+            <ul id="project-list"></ul>
+        </section>
+        <section id="project-view" style="display: none;">
+            <div class="project-header">
+                <h2 id="current-project-title"></h2>
+                <button id="back-to-projects">Volver a Proyectos</button>
+            </div>
+            <nav>
+                <button id="tab-notepad">Notepad</button>
+                <button id="tab-kv">Llave-Valor</button>
+            </nav>
+            <div id="notepad-tab" class="tab-content">
+                <textarea id="notes" placeholder="Escribe tus notas aquí..."></textarea>
+                <button id="save-notes">Guardar Notas</button>
+            </div>
+            <div id="kv-tab" class="tab-content" style="display: none;">
+                <div id="kv-form">
+                    <input type="text" id="key" placeholder="Llave">
+                    <input type="text" id="value" placeholder="Valor">
+                    <button id="add-kv">Agregar</button>
+                </div>
+                <ul id="kv-list"></ul>
+            </div>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
