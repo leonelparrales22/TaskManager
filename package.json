@@ -21,14 +21,15 @@
     "appId": "com.taskmanager.app",
     "productName": "TaskManager",
     "directories": {
-      "output": "dist"
+      "output": "build"
     },
     "files": [
       "**/*",
-      "!dist/**/*"
+      "!build/**/*"
     ],
     "win": {
-      "target": "nsis"
+      "target": "dir",
+      "forceCodeSigning": false
     }
   }
 }

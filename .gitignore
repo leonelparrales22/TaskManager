@@ -104,3 +104,13 @@ logs
 # Temporary files
 tmp/
 temp/
+
+# Build outputs
+build/
+output/
+dist/
+release/
+
+# Electron
+app/dist/
+app/build/
