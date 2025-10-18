@@ -24,7 +24,7 @@ function createWindow() {
   serverApp.use(bodyParser.json());
   serverApp.use(express.static(path.join(__dirname, "."))); // Servir archivos estáticos
 
-  const DATA_DIR = path.join(__dirname, "data");
+  const DATA_DIR = path.join(process.cwd(), "data");
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR);
   }

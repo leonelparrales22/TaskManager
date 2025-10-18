@@ -27,7 +27,7 @@ Una aplicación de escritorio para gestionar apuntes organizados por proyectos, 
 
 3. Inicia en modo desarrollo:
    ```
-   npm run electron
+   npm start
    ```
 
 ### Construir Ejecutable
@@ -39,12 +39,12 @@ Para crear un ejecutable portable:
    npm install
    ```
 
-2. Construye la aplicación:
+3. Construye la aplicación:
    ```
    npm run build
    ```
 
-3. El ejecutable se generará en `dist/`. Ejecuta el `.exe` para usar la app.
+3. El ejecutable se generará en `build/win-unpacked/`. Ejecuta `TaskManager.exe` para usar la app.
 
 ## Portabilidad
 

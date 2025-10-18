@@ -14,8 +14,68 @@ document.addEventListener("DOMContentLoaded", () => {
   const addKvBtn = document.getElementById("add-kv");
   const kvList = document.getElementById("kv-list");
   const backToProjectsBtn = document.getElementById("back-to-projects");
+  const confirmModal = document.getElementById("confirm-modal");
+  const confirmMessage = document.getElementById("confirm-message");
+  const confirmYes = document.getElementById("confirm-yes");
+  const confirmNo = document.getElementById("confirm-no");
+  const promptModal = document.getElementById("prompt-modal");
+  const promptMessage = document.getElementById("prompt-message");
+  const promptInput = document.getElementById("prompt-input");
+  const promptOk = document.getElementById("prompt-ok");
+  const promptCancel = document.getElementById("prompt-cancel");
+  const alertModal = document.getElementById("alert-modal");
+  const alertMessage = document.getElementById("alert-message");
+  const alertOk = document.getElementById("alert-ok");
 
   let currentProject = null;
+  let confirmCallback = null;
+  let promptCallback = null;
+  let alertCallback = null;
+
+  function showConfirm(message, callback) {
+    confirmMessage.textContent = message;
+    confirmCallback = callback;
+    confirmModal.style.display = "flex";
+  }
+
+  function showPrompt(message, defaultValue, callback) {
+    promptMessage.textContent = message;
+    promptInput.value = defaultValue;
+    promptCallback = callback;
+    promptModal.style.display = "flex";
+    promptInput.focus();
+  }
+
+  function showAlert(message, callback = null) {
+    alertMessage.textContent = message;
+    alertCallback = callback;
+    alertModal.style.display = "flex";
+  }
+
+  confirmYes.onclick = () => {
+    confirmModal.style.display = "none";
+    if (confirmCallback) confirmCallback(true);
+  };
+
+  confirmNo.onclick = () => {
+    confirmModal.style.display = "none";
+    if (confirmCallback) confirmCallback(false);
+  };
+
+  promptOk.onclick = () => {
+    promptModal.style.display = "none";
+    if (promptCallback) promptCallback(promptInput.value);
+  };
+
+  promptCancel.onclick = () => {
+    promptModal.style.display = "none";
+    if (promptCallback) promptCallback(null);
+  };
+
+  alertOk.onclick = () => {
+    alertModal.style.display = "none";
+    if (alertCallback) alertCallback();
+  };
 
   // Cargar proyectos
   async function loadProjects() {
@@ -42,25 +102,26 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Crear nuevo proyecto
-  newProjectBtn.onclick = async () => {
-    const projectName = prompt("Nombre del nuevo proyecto:");
-    if (projectName) {
-      try {
-        const response = await fetch("/api/projects", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: projectName }),
-        });
-        if (response.ok) {
-          loadProjects();
-        } else {
-          const data = await response.json();
-          alert(data.message);
+  newProjectBtn.onclick = () => {
+    showPrompt("Nombre del nuevo proyecto:", "", async (projectName) => {
+      if (projectName) {
+        try {
+          const response = await fetch("/api/projects", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: projectName }),
+          });
+          if (response.ok) {
+            loadProjects();
+          } else {
+            const data = await response.json();
+            showAlert(data.message);
+          }
+        } catch (error) {
+          console.error("Error creando proyecto:", error);
         }
-      } catch (error) {
-        console.error("Error creando proyecto:", error);
       }
-    }
+    });
   };
 
   // Seleccionar proyecto
@@ -173,36 +234,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.editKv = async (key) => {
     const kv = await (await fetch(`/api/projects/${currentProject}/kv`)).json();
-    const newValue = prompt("Nuevo valor:", kv[key]);
-    if (newValue !== null) {
-      try {
-        const response = await fetch(`/api/projects/${currentProject}/kv/${key}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ value: newValue }),
-        });
-        if (response.ok) {
-          loadKv();
+    showPrompt("Nuevo valor:", kv[key], async (newValue) => {
+      if (newValue !== null) {
+        try {
+          const response = await fetch(`/api/projects/${currentProject}/kv/${key}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ value: newValue }),
+          });
+          if (response.ok) {
+            loadKv();
+          }
+        } catch (error) {
+          console.error("Error editando kv:", error);
         }
-      } catch (error) {
-        console.error("Error editando kv:", error);
       }
-    }
+    });
   };
 
   window.deleteKv = async (key) => {
-    if (confirm("¿Eliminar esta entrada?")) {
-      try {
-        const response = await fetch(`/api/projects/${currentProject}/kv/${key}`, {
-          method: "DELETE",
-        });
-        if (response.ok) {
-          loadKv();
+    showConfirm("¿Eliminar esta entrada?", async (confirmed) => {
+      if (confirmed) {
+        try {
+          const response = await fetch(`/api/projects/${currentProject}/kv/${key}`, {
+            method: "DELETE",
+          });
+          if (response.ok) {
+            loadKv();
+          }
+        } catch (error) {
+          console.error("Error eliminando kv:", error);
         }
-      } catch (error) {
-        console.error("Error eliminando kv:", error);
       }
-    }
+    });
   };
 
   window.copyKv = async (key) => {
@@ -211,37 +275,38 @@ document.addEventListener("DOMContentLoaded", () => {
       const kv = await response.json();
       if (kv.hasOwnProperty(key)) {
         await navigator.clipboard.writeText(kv[key]);
-        alert("Valor copiado al portapapeles");
+        showAlert("Valor copiado al portapapeles");
       }
     } catch (error) {
       console.error("Error copiando:", error);
-      alert("Error al copiar");
+      showAlert("Error al copiar");
     }
   };
 
   window.editProject = async (oldName) => {
-    const newName = prompt("Nuevo nombre para el proyecto:", oldName);
-    if (newName && newName !== oldName) {
-      try {
-        const response = await fetch(`/api/projects/${oldName}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ newName }),
-        });
-        if (response.ok) {
-          loadProjects();
-          if (currentProject === oldName) {
-            currentProject = newName;
-            currentProjectTitle.textContent = newName;
+    showPrompt("Nuevo nombre para el proyecto:", oldName, async (newName) => {
+      if (newName && newName !== oldName) {
+        try {
+          const response = await fetch(`/api/projects/${oldName}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ newName }),
+          });
+          if (response.ok) {
+            loadProjects();
+            if (currentProject === oldName) {
+              currentProject = newName;
+              currentProjectTitle.textContent = newName;
+            }
+          } else {
+            const data = await response.json();
+            showAlert(data.message);
           }
-        } else {
-          const data = await response.json();
-          alert(data.message);
+        } catch (error) {
+          console.error("Error editando proyecto:", error);
         }
-      } catch (error) {
-        console.error("Error editando proyecto:", error);
       }
-    }
+    });
   };
 
   loadProjects();
