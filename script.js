@@ -142,7 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
       kvList.innerHTML = "";
       Object.entries(kv).forEach(([key, value]) => {
         const li = document.createElement("li");
-                li.innerHTML = `<strong class="kv-key">${key}:</strong> <span class="kv-value">${value}</span> <button onclick="copyKv('${key}')">Copiar</button> <button onclick="editKv('${key}')">Editar</button> <button class="delete-btn" onclick="deleteKv('${key}')">Eliminar</button>`;
+        li.innerHTML = `<strong class="kv-key">${key}:</strong> <span class="kv-value">${value}</span> <button onclick="copyKv('${key}')">Copiar</button> <button onclick="editKv('${key}')">Editar</button> <button class="delete-btn" onclick="deleteKv('${key}')">Eliminar</button>`;
         kvList.appendChild(li);
       });
     } catch (error) {
