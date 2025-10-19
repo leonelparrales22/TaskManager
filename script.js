@@ -189,6 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (completedProjects.length > 0) {
         document.getElementById("completed-projects").style.display = "block";
         completedProjectList.style.display = "none";
+        toggleCompletedProjects.textContent = "Mostrar";
       } else {
         document.getElementById("completed-projects").style.display = "none";
       }
@@ -438,13 +439,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  toggleCompletedProjects.onclick = () => {
-    if (completedProjectList.style.display === "none") {
-      completedProjectList.style.display = "block";
-      toggleCompletedProjects.textContent = "Ocultar";
+  toggleCompleted.onclick = () => {
+    if (completedList.style.display === "none") {
+      completedList.style.display = "block";
+      toggleCompleted.textContent = "Ocultar";
     } else {
-      completedProjectList.style.display = "none";
-      toggleCompletedProjects.textContent = "Mostrar";
+      completedList.style.display = "none";
+      toggleCompleted.textContent = "Mostrar";
     }
   };
 
