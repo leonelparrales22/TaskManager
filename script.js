@@ -286,6 +286,36 @@ document.addEventListener("DOMContentLoaded", () => {
         editor.on("change", debounceSave);
       }
       editor.setMarkdown(notes);
+      // Scroll to top after loading content with multiple attempts for sync
+      setTimeout(() => {
+        // Scroll the main editor wrapper
+        const editorWrapper = document.querySelector('.toastui-editor-defaultUI');
+        if (editorWrapper) {
+          editorWrapper.scrollTop = 0;
+        }
+        
+        // Scroll both editor and preview containers
+        const mdContainer = document.querySelector('.toastui-editor-md-container');
+        const previewContainer = document.querySelector('.toastui-editor-md-preview');
+        
+        if (mdContainer) mdContainer.scrollTop = 0;
+        if (previewContainer) previewContainer.scrollTop = 0;
+        
+        // Move cursor to start
+        try {
+          editor.moveCursorToStart();
+        } catch (e) {
+          editor.focus();
+        }
+      }, 300);
+      
+      // Additional sync after a longer delay
+      setTimeout(() => {
+        const previewContainer = document.querySelector('.toastui-editor-md-preview');
+        if (previewContainer) {
+          previewContainer.scrollTop = 0;
+        }
+      }, 500);
     } catch (error) {
       console.error("Error cargando notas:", error);
     }
