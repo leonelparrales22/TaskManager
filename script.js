@@ -150,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function selectProject(project) {
     currentProject = project;
     currentProjectTitle.textContent = project;
+    document.getElementById("main-header").style.display = "none";
     document.getElementById("projects").style.display = "none";
     projectView.style.display = "block";
     loadNotes();
@@ -160,6 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Volver a proyectos
   backToProjectsBtn.onclick = () => {
+    document.getElementById("main-header").style.display = "block";
     document.getElementById("projects").style.display = "block";
     projectView.style.display = "none";
     currentProject = null;
