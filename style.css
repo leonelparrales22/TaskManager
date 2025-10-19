@@ -148,16 +148,23 @@ input:focus {
   box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
 }
 
-#todo-form {
+#kv-form {
   display: flex;
-  align-items: center;
+  width: 100%;
   gap: 10px;
-  margin-bottom: 20px;
+  align-items: center;
 }
 
-#todo-text {
+#key {
+  flex: 0 0 150px;
+}
+
+#value {
   flex: 1;
-  width: auto;
+}
+
+#kv-form button {
+  flex: 0 0 auto;
 }
 
 .tab-content {
