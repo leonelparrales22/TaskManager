@@ -19,6 +19,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const addTodoBtn = document.getElementById("add-todo");
   const pendingList = document.getElementById("pending-list");
   const completedList = document.getElementById("completed-list");
+  const pendingCount = document.getElementById("pending-count");
+  const completedCount = document.getElementById("completed-count");
+  const toggleCompleted = document.getElementById("toggle-completed");
   const backToProjectsBtn = document.getElementById("back-to-projects");
   const confirmModal = document.getElementById("confirm-modal");
   const confirmMessage = document.getElementById("confirm-message");
@@ -235,6 +238,8 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch(`/api/projects/${currentProject}/todo`);
       const todos = await response.json();
+      let pendingCountNum = 0;
+      let completedCountNum = 0;
       pendingList.innerHTML = "";
       completedList.innerHTML = "";
       todos.forEach((todo, index) => {
@@ -249,10 +254,16 @@ document.addEventListener("DOMContentLoaded", () => {
           li.addEventListener("dragover", handleDragOver);
           li.addEventListener("drop", handleDrop);
           pendingList.appendChild(li);
+          pendingCountNum++;
         } else {
           completedList.appendChild(li);
+          completedCountNum++;
         }
       });
+      pendingCount.textContent = pendingCountNum;
+      completedCount.textContent = completedCountNum;
+      completedList.style.display = "none"; // Collapsed by default
+      toggleCompleted.textContent = "Mostrar";
     } catch (error) {
       console.error("Error cargando todo:", error);
     }
@@ -331,6 +342,16 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (error) {
         console.error("Error agregando todo:", error);
       }
+    }
+  };
+
+  toggleCompleted.onclick = () => {
+    if (completedList.style.display === "none") {
+      completedList.style.display = "block";
+      toggleCompleted.textContent = "Ocultar";
+    } else {
+      completedList.style.display = "none";
+      toggleCompleted.textContent = "Mostrar";
     }
   };
 
