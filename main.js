@@ -126,7 +126,7 @@ function createWindow() {
   serverApp.post("/api/projects/:name/notes", (req, res) => {
     const { name } = req.params;
     const { content } = req.body;
-    const notesFile = path.join(DATA_DIR, `notes_${name}.md`);
+    const notesFile = path.join(DATA_DIR, `notes_${name}.json`);
     fs.writeFileSync(notesFile, content);
     res.json({ message: "Notas guardadas" });
   });
