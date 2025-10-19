@@ -22,7 +22,6 @@ function createWindow() {
   const serverApp = express();
   serverApp.use(cors());
   serverApp.use(bodyParser.json());
-  serverApp.use(express.static(path.join(__dirname, "."))); // Servir archivos estáticos
 
   const DATA_DIR = path.join(process.cwd(), "data");
   if (!fs.existsSync(DATA_DIR)) {
@@ -81,6 +80,29 @@ function createWindow() {
       res.json({ message: "Proyecto renombrado" });
     } else {
       res.status(400).json({ message: "Nombre inválido o ya existe" });
+    }
+  });
+
+  serverApp.delete("/api/projects/:name", (req, res) => {
+    const { name } = req.params;
+    console.log("DELETE proyecto:", name);
+    const projects = readProjects();
+    const index = projects.indexOf(name);
+    if (index !== -1) {
+      projects.splice(index, 1);
+      writeProjects(projects);
+      // Eliminar archivos
+      const notesFile = path.join(DATA_DIR, `notes_${name}.txt`);
+      if (fs.existsSync(notesFile)) {
+        fs.unlinkSync(notesFile);
+      }
+      const kvFile = path.join(DATA_DIR, `kv_${name}.json`);
+      if (fs.existsSync(kvFile)) {
+        fs.unlinkSync(kvFile);
+      }
+      res.json({ message: "Proyecto eliminado" });
+    } else {
+      res.status(404).json({ message: "Proyecto no encontrado" });
     }
   });
 
@@ -159,6 +181,8 @@ function createWindow() {
       res.status(404).json({ message: "Archivo no encontrado" });
     }
   });
+
+  serverApp.use(express.static(path.join(__dirname, "."))); // Servir archivos estáticos
 
   server = serverApp.listen(3000, () => {
     console.log("Servidor corriendo en puerto 3000");

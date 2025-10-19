@@ -92,8 +92,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const editBtn = document.createElement("button");
         editBtn.textContent = "Editar";
         editBtn.onclick = () => editProject(project);
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "Eliminar";
+        deleteBtn.className = "delete-btn";
+        deleteBtn.onclick = () => deleteProject(project);
         li.appendChild(selectBtn);
         li.appendChild(editBtn);
+        li.appendChild(deleteBtn);
         projectList.appendChild(li);
       });
     } catch (error) {
@@ -287,7 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showPrompt("Nuevo nombre para el proyecto:", oldName, async (newName) => {
       if (newName && newName !== oldName) {
         try {
-          const response = await fetch(`/api/projects/${oldName}`, {
+          const response = await fetch(`/api/projects/${encodeURIComponent(oldName)}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ newName }),
@@ -304,6 +309,32 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         } catch (error) {
           console.error("Error editando proyecto:", error);
+        }
+      }
+    });
+  };
+
+  window.deleteProject = async (projectName) => {
+    console.log("Eliminando proyecto:", projectName);
+    showConfirm("¿Eliminar el proyecto '" + projectName + "' y todos sus datos?", async (confirmed) => {
+      console.log("Confirmado:", confirmed);
+      if (confirmed) {
+        try {
+          const response = await fetch(`/api/projects/${encodeURIComponent(projectName)}`, {
+            method: "DELETE",
+          });
+          console.log("Respuesta DELETE:", response.status);
+          if (response.ok) {
+            loadProjects();
+            if (currentProject === projectName) {
+              backToProjectsBtn.click();
+            }
+          } else {
+            const data = await response.json();
+            showAlert(data.message);
+          }
+        } catch (error) {
+          console.error("Error eliminando proyecto:", error);
         }
       }
     });
