@@ -93,25 +93,25 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch("/api/projects");
       const projects = await response.json();
-      const activeProjects = projects.filter(p => !p.completed);
-      const completedProjects = projects.filter(p => p.completed);
+      const activeProjects = projects.filter((p) => !p.completed);
+      const completedProjects = projects.filter((p) => p.completed);
 
       // Populate active projects
       projectList.innerHTML = "";
       for (const project of activeProjects) {
         const li = document.createElement("li");
         li.className = "project-item";
-        
+
         // Fetch pending tasks count
         let pendingCount = 0;
         try {
           const todoResponse = await fetch(`/api/projects/${encodeURIComponent(project.name)}/todo`);
           const todos = await todoResponse.json();
-          pendingCount = todos.filter(todo => !todo.completed).length;
+          pendingCount = todos.filter((todo) => !todo.completed).length;
         } catch (error) {
           console.error(`Error cargando TODO para ${project.name}:`, error);
         }
-        
+
         li.textContent = project.name;
         li.onclick = () => selectProject(project.name);
         const actionsDiv = document.createElement("div");
@@ -153,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
       for (const project of completedProjects) {
         const li = document.createElement("li");
         li.className = "project-item completed-project";
-        
+
         li.textContent = project.name;
         li.onclick = () => selectProject(project.name);
         const actionsDiv = document.createElement("div");

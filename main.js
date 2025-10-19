@@ -48,8 +48,8 @@ function createWindow() {
     if (fs.existsSync(projectsFile)) {
       let projects = JSON.parse(fs.readFileSync(projectsFile, "utf8"));
       // Migrate old format if needed
-      if (projects.length > 0 && typeof projects[0] === 'string') {
-        projects = projects.map(name => ({ name, completed: false }));
+      if (projects.length > 0 && typeof projects[0] === "string") {
+        projects = projects.map((name) => ({ name, completed: false }));
         writeProjects(projects);
       }
       return projects;
@@ -69,7 +69,7 @@ function createWindow() {
   serverApp.post("/api/projects", (req, res) => {
     const { name } = req.body;
     const projects = readProjects();
-    if (!projects.find(p => p.name === name)) {
+    if (!projects.find((p) => p.name === name)) {
       projects.push({ name, completed: false });
       writeProjects(projects);
       res.status(201).json({ message: "Proyecto creado" });
@@ -82,11 +82,11 @@ function createWindow() {
     const { name } = req.params;
     const { completed } = req.body;
     const projects = readProjects();
-    const project = projects.find(p => p.name === name);
+    const project = projects.find((p) => p.name === name);
     if (project) {
       project.completed = completed;
       writeProjects(projects);
-      res.json({ message: `Proyecto ${completed ? 'finalizado' : 'reactivado'}` });
+      res.json({ message: `Proyecto ${completed ? "finalizado" : "reactivado"}` });
     } else {
       res.status(404).json({ message: "Proyecto no encontrado" });
     }
@@ -95,7 +95,7 @@ function createWindow() {
   serverApp.delete("/api/projects/:name", (req, res) => {
     const { name } = req.params;
     const projects = readProjects();
-    const index = projects.findIndex(p => p.name === name);
+    const index = projects.findIndex((p) => p.name === name);
     if (index !== -1) {
       projects.splice(index, 1);
       writeProjects(projects);
