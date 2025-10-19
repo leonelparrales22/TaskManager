@@ -186,12 +186,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const notes = await response.text();
       if (!editor) {
         editor = new toastui.Editor({
-          el: document.querySelector('#editor'),
-          height: '500px',
-          initialEditType: 'markdown',
-          previewStyle: 'vertical'
+          el: document.querySelector("#editor"),
+          height: "500px",
+          initialEditType: "markdown",
+          previewStyle: "vertical",
         });
-        editor.on('change', debounceSave);
+        editor.on("change", debounceSave);
       }
       editor.setMarkdown(notes);
     } catch (error) {
