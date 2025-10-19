@@ -353,11 +353,35 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch(`/api/projects/${currentProject}/kv`);
       const kv = await response.json();
       kvList.innerHTML = "";
-      Object.entries(kv).forEach(([key, value]) => {
+      kv.forEach((item, index) => {
         const li = document.createElement("li");
-        li.innerHTML = `<strong class="kv-key">${key}:</strong> <span class="kv-value">${value}</span> <button onclick="copyKv('${key}')"><i class="fas fa-copy"></i> Copiar</button> <button onclick="editKv('${key}')"><i class="fas fa-edit"></i> Editar</button> <button class="delete-btn" onclick="deleteKv('${key}')"><i class="fas fa-trash"></i> Eliminar</button>`;
+        li.className = "kv-item";
+        li.draggable = true;
+        li.dataset.index = index;
+
+        li.innerHTML = `
+          <div class="kv-content">
+            <strong>${item.key}:</strong> ${item.value}
+          </div>
+          <div class="kv-actions">
+            <button onclick="copyKv('${item.key}')"><i class="fas fa-copy"></i></button>
+            <button onclick="editKv(${index})"><i class="fas fa-edit"></i></button>
+            <button class="delete-btn" onclick="deleteKv(${index})"><i class="fas fa-trash"></i></button>
+          </div>
+        `;
+
+        // Add drag and drop event listeners
+        li.addEventListener("dragstart", handleDragStart);
+        li.addEventListener("dragover", handleDragOver);
+        li.addEventListener("drop", (e) => handleDrop(e, "kv"));
+        li.addEventListener("dragend", handleDragEnd);
+
         kvList.appendChild(li);
       });
+
+      if (kv.length === 0) {
+        kvList.innerHTML = "<li class='empty-message'>No hay llaves-valor en este proyecto</li>";
+      }
     } catch (error) {
       console.error("Error cargando kv:", error);
     }
@@ -399,8 +423,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  let draggedIndex = null;
-  let draggedProjectIndex = null;
+  function handleDragEnd(e) {
+    // Clean up drag state
+    draggedIndex = null;
+  }
 
   function handleDragStart(e) {
     draggedIndex = parseInt(e.target.dataset.index);
@@ -412,12 +438,31 @@ document.addEventListener("DOMContentLoaded", () => {
     e.dataTransfer.dropEffect = "move";
   }
 
-  async function handleDrop(e) {
+  async function handleDrop(e, type) {
     e.preventDefault();
     const targetLi = e.target.closest("li");
     if (!targetLi) return;
 
-    if (targetLi.closest("#pending-list")) {
+    if (type === "kv") {
+      // Drop on KV items
+      const targetIndex = parseInt(targetLi.dataset.index);
+      if (draggedIndex !== null && draggedIndex !== targetIndex) {
+        try {
+          const response = await fetch(`/api/projects/${currentProject}/kv/reorder`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ from: draggedIndex, to: targetIndex }),
+          });
+          if (response.ok) {
+            loadKv();
+          } else {
+            console.error("Error reordering KV:", await response.text());
+          }
+        } catch (error) {
+          console.error("Error reordering KV:", error);
+        }
+      }
+    } else if (targetLi.closest("#pending-list")) {
       // Drop on TODO items
       const targetIndex = parseInt(targetLi.dataset.index);
       if (draggedIndex !== null && draggedIndex !== targetIndex) {
@@ -509,31 +554,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  window.editKv = async (key) => {
-    const kv = await (await fetch(`/api/projects/${currentProject}/kv`)).json();
-    showPrompt("Nuevo valor:", kv[key], async (newValue) => {
-      if (newValue !== null) {
-        try {
-          const response = await fetch(`/api/projects/${currentProject}/kv/${key}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ value: newValue }),
-          });
-          if (response.ok) {
-            loadKv();
+  window.editKv = async (index) => {
+    try {
+      const response = await fetch(`/api/projects/${currentProject}/kv`);
+      const kv = await response.json();
+      const currentItem = kv[index];
+      if (currentItem) {
+        showPrompt("Nuevo valor:", currentItem.value, async (newValue) => {
+          if (newValue !== null) {
+            try {
+              const updateResponse = await fetch(`/api/projects/${currentProject}/kv/${index}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ value: newValue }),
+              });
+              if (updateResponse.ok) {
+                loadKv();
+              }
+            } catch (error) {
+              console.error("Error editando kv:", error);
+            }
           }
-        } catch (error) {
-          console.error("Error editando kv:", error);
-        }
+        });
       }
-    });
+    } catch (error) {
+      console.error("Error obteniendo kv:", error);
+    }
   };
 
-  window.deleteKv = async (key) => {
+  window.deleteKv = async (index) => {
     showConfirm("¿Eliminar esta entrada?", async (confirmed) => {
       if (confirmed) {
         try {
-          const response = await fetch(`/api/projects/${currentProject}/kv/${key}`, {
+          const response = await fetch(`/api/projects/${currentProject}/kv/${index}`, {
             method: "DELETE",
           });
           if (response.ok) {
@@ -612,8 +665,9 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch(`/api/projects/${currentProject}/kv`);
       const kv = await response.json();
-      if (kv.hasOwnProperty(key)) {
-        await navigator.clipboard.writeText(kv[key]);
+      const item = kv.find((item) => item.key === key);
+      if (item) {
+        await navigator.clipboard.writeText(item.value);
         showAlert("Valor copiado al portapapeles");
       }
     } catch (error) {

@@ -171,9 +171,18 @@ function createWindow() {
     const { name } = req.params;
     const kvFile = path.join(DATA_DIR, `kv_${name}.json`);
     if (fs.existsSync(kvFile)) {
-      res.json(JSON.parse(fs.readFileSync(kvFile, "utf8")));
+      const kvData = JSON.parse(fs.readFileSync(kvFile, "utf8"));
+      // Convert object to array for frontend if it's still in old format
+      if (!Array.isArray(kvData)) {
+        const kvArray = Object.entries(kvData).map(([key, value]) => ({ key, value }));
+        // Save in new format
+        fs.writeFileSync(kvFile, JSON.stringify(kvArray, null, 2));
+        res.json(kvArray);
+      } else {
+        res.json(kvData);
+      }
     } else {
-      res.json({});
+      res.json([]);
     }
   });
 
@@ -181,44 +190,69 @@ function createWindow() {
     const { name } = req.params;
     const { key, value } = req.body;
     const kvFile = path.join(DATA_DIR, `kv_${name}.json`);
-    let kv = {};
+    let kv = [];
     if (fs.existsSync(kvFile)) {
       kv = JSON.parse(fs.readFileSync(kvFile, "utf8"));
     }
-    kv[key] = value;
+    // Check if key already exists
+    const existingIndex = kv.findIndex((item) => item.key === key);
+    if (existingIndex !== -1) {
+      kv[existingIndex].value = value;
+    } else {
+      kv.push({ key, value });
+    }
     fs.writeFileSync(kvFile, JSON.stringify(kv, null, 2));
-    res.json({ message: "Llave-valor agregado" });
+    res.json({ message: "Llave-valor agregado/actualizado" });
   });
 
-  serverApp.put("/api/projects/:name/kv/:key", (req, res) => {
-    const { name, key } = req.params;
-    const { value } = req.body;
+  serverApp.put("/api/projects/:name/kv/reorder", (req, res) => {
+    const { name } = req.params;
+    const { from, to } = req.body;
     const kvFile = path.join(DATA_DIR, `kv_${name}.json`);
     if (fs.existsSync(kvFile)) {
       let kv = JSON.parse(fs.readFileSync(kvFile, "utf8"));
-      if (kv.hasOwnProperty(key)) {
-        kv[key] = value;
+      if (kv[from] && kv[to] !== undefined) {
+        const [moved] = kv.splice(from, 1);
+        kv.splice(to, 0, moved);
         fs.writeFileSync(kvFile, JSON.stringify(kv, null, 2));
-        res.json({ message: "Llave-valor actualizado" });
+        res.json({ message: "Llaves-valor reordenadas" });
       } else {
-        res.status(404).json({ message: "Llave no encontrada" });
+        res.status(404).json({ message: "Índices inválidos" });
       }
     } else {
       res.status(404).json({ message: "Archivo no encontrado" });
     }
   });
 
-  serverApp.delete("/api/projects/:name/kv/:key", (req, res) => {
-    const { name, key } = req.params;
+  serverApp.put("/api/projects/:name/kv/:index", (req, res) => {
+    const { name, index } = req.params;
+    const { value } = req.body;
     const kvFile = path.join(DATA_DIR, `kv_${name}.json`);
     if (fs.existsSync(kvFile)) {
       let kv = JSON.parse(fs.readFileSync(kvFile, "utf8"));
-      if (kv.hasOwnProperty(key)) {
-        delete kv[key];
+      if (kv[index]) {
+        kv[index].value = value;
+        fs.writeFileSync(kvFile, JSON.stringify(kv, null, 2));
+        res.json({ message: "Llave-valor actualizado" });
+      } else {
+        res.status(404).json({ message: "Llave-valor no encontrada" });
+      }
+    } else {
+      res.status(404).json({ message: "Archivo no encontrado" });
+    }
+  });
+
+  serverApp.delete("/api/projects/:name/kv/:index", (req, res) => {
+    const { name, index } = req.params;
+    const kvFile = path.join(DATA_DIR, `kv_${name}.json`);
+    if (fs.existsSync(kvFile)) {
+      let kv = JSON.parse(fs.readFileSync(kvFile, "utf8"));
+      if (kv[index]) {
+        kv.splice(index, 1);
         fs.writeFileSync(kvFile, JSON.stringify(kv, null, 2));
         res.json({ message: "Llave-valor eliminado" });
       } else {
-        res.status(404).json({ message: "Llave no encontrada" });
+        res.status(404).json({ message: "Llave-valor no encontrada" });
       }
     } else {
       res.status(404).json({ message: "Archivo no encontrado" });
