@@ -123,6 +123,12 @@ li:hover {
   gap: 10px;
 }
 
+.pending-tasks {
+  color: var(--accent-color);
+  font-weight: 600;
+  font-size: 0.9em;
+}
+
 #pending-list li, #completed-list li {
   justify-content: space-between;
 }

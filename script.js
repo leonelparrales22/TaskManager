@@ -93,13 +93,30 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/api/projects");
       const projects = await response.json();
       projectList.innerHTML = "";
-      projects.forEach((project) => {
+      for (const project of projects) {
         const li = document.createElement("li");
         li.className = "project-item";
-        li.textContent = project;
+
+        // Fetch pending tasks count
+        let pendingCount = 0;
+        try {
+          const todoResponse = await fetch(`/api/projects/${encodeURIComponent(project)}/todo`);
+          const todos = await todoResponse.json();
+          pendingCount = todos.filter((todo) => !todo.completed).length;
+        } catch (error) {
+          console.error(`Error cargando TODO para ${project}:`, error);
+        }
+
+        li.innerHTML = project;
         li.onclick = () => selectProject(project);
         const actionsDiv = document.createElement("div");
         actionsDiv.className = "project-actions";
+        if (pendingCount > 0) {
+          const countSpan = document.createElement("span");
+          countSpan.className = "pending-tasks";
+          countSpan.textContent = `(${pendingCount} pendientes)`;
+          actionsDiv.appendChild(countSpan);
+        }
         const editBtn = document.createElement("button");
         editBtn.innerHTML = '<i class="fas fa-edit"></i> Editar';
         editBtn.onclick = (e) => {
@@ -117,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
         actionsDiv.appendChild(deleteBtn);
         li.appendChild(actionsDiv);
         projectList.appendChild(li);
-      });
+      }
     } catch (error) {
       console.error("Error cargando proyectos:", error);
     }
