@@ -108,6 +108,16 @@ li:hover {
   border-radius: 8px;
 }
 
+.project-item {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+.project-item:hover {
+  background: rgba(74, 144, 226, 0.1);
+}
+
 #pending-list li, #completed-list li {
   justify-content: space-between;
 }

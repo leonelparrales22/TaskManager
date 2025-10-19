@@ -95,18 +95,22 @@ document.addEventListener("DOMContentLoaded", () => {
       projectList.innerHTML = "";
       projects.forEach((project) => {
         const li = document.createElement("li");
+        li.className = "project-item";
         li.textContent = project;
-        const selectBtn = document.createElement("button");
-        selectBtn.innerHTML = '<i class="fas fa-folder-open"></i> Seleccionar';
-        selectBtn.onclick = () => selectProject(project);
+        li.onclick = () => selectProject(project);
         const editBtn = document.createElement("button");
         editBtn.innerHTML = '<i class="fas fa-edit"></i> Editar';
-        editBtn.onclick = () => editProject(project);
+        editBtn.onclick = (e) => {
+          e.stopPropagation();
+          editProject(project);
+        };
         const deleteBtn = document.createElement("button");
         deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
         deleteBtn.className = "delete-btn";
-        deleteBtn.onclick = () => deleteProject(project);
-        li.appendChild(selectBtn);
+        deleteBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteProject(project);
+        };
         li.appendChild(editBtn);
         li.appendChild(deleteBtn);
         projectList.appendChild(li);
