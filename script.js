@@ -188,37 +188,37 @@ document.addEventListener("DOMContentLoaded", () => {
         simplemde = new SimpleMDE({ element: notesTextarea });
         simplemde.codemirror.on("change", debounceSave);
         // Add slash commands
-        simplemde.codemirror.on('keydown', (cm, e) => {
-          if (e.key === '/' && cm.getLine(cm.getCursor().line).trim() === '') {
+        simplemde.codemirror.on("keydown", (cm, e) => {
+          if (e.key === "/" && cm.getLine(cm.getCursor().line).trim() === "") {
             e.preventDefault(); // Don't insert /
             // Wait for next key
             let nextKeyHandler = (cm2, e2) => {
-              if (e2.key === 'h' || e2.key === '1') {
+              if (e2.key === "h" || e2.key === "1") {
                 e2.preventDefault();
-                cm.replaceSelection('# ');
-              } else if (e2.key === '2') {
+                cm.replaceSelection("# ");
+              } else if (e2.key === "2") {
                 e2.preventDefault();
-                cm.replaceSelection('## ');
-              } else if (e2.key === '3') {
+                cm.replaceSelection("## ");
+              } else if (e2.key === "3") {
                 e2.preventDefault();
-                cm.replaceSelection('### ');
-              } else if (e2.key === 'c') {
+                cm.replaceSelection("### ");
+              } else if (e2.key === "c") {
                 e2.preventDefault();
-                cm.replaceSelection('```\n\n```');
+                cm.replaceSelection("```\n\n```");
                 cm.setCursor(cm.getCursor().line - 1, 0);
-              } else if (e2.key === 'l') {
+              } else if (e2.key === "l") {
                 e2.preventDefault();
-                cm.replaceSelection('- ');
-              } else if (e2.key === 'q') {
+                cm.replaceSelection("- ");
+              } else if (e2.key === "q") {
                 e2.preventDefault();
-                cm.replaceSelection('> ');
+                cm.replaceSelection("> ");
               } else {
                 // Insert the key
                 return;
               }
-              simplemde.codemirror.off('keydown', nextKeyHandler);
+              simplemde.codemirror.off("keydown", nextKeyHandler);
             };
-            simplemde.codemirror.on('keydown', nextKeyHandler);
+            simplemde.codemirror.on("keydown", nextKeyHandler);
           }
         });
       }
