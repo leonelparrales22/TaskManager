@@ -24,6 +24,7 @@
         <nav>
           <button id="tab-notepad">Notepad</button>
           <button id="tab-kv">Llave-Valor</button>
+          <button id="tab-todo">TODO</button>
         </nav>
         <div id="notepad-tab" class="tab-content">
           <textarea id="notes" placeholder="Escribe tus notas aquí..."></textarea>
@@ -36,6 +37,13 @@
             <button id="add-kv">Agregar</button>
           </div>
           <ul id="kv-list"></ul>
+        </div>
+        <div id="todo-tab" class="tab-content" style="display: none">
+          <div id="todo-form">
+            <input type="text" id="todo-text" placeholder="Nueva tarea" />
+            <button id="add-todo">Agregar</button>
+          </div>
+          <ul id="todo-list"></ul>
         </div>
       </section>
     </main>

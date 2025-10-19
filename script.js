@@ -5,14 +5,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const currentProjectTitle = document.getElementById("current-project-title");
   const tabNotepad = document.getElementById("tab-notepad");
   const tabKv = document.getElementById("tab-kv");
+  const tabTodo = document.getElementById("tab-todo");
   const notepadTab = document.getElementById("notepad-tab");
   const kvTab = document.getElementById("kv-tab");
+  const todoTab = document.getElementById("todo-tab");
   const notesTextarea = document.getElementById("notes");
   const saveNotesBtn = document.getElementById("save-notes");
   const keyInput = document.getElementById("key");
   const valueInput = document.getElementById("value");
   const addKvBtn = document.getElementById("add-kv");
   const kvList = document.getElementById("kv-list");
+  const todoText = document.getElementById("todo-text");
+  const addTodoBtn = document.getElementById("add-todo");
+  const todoList = document.getElementById("todo-list");
   const backToProjectsBtn = document.getElementById("back-to-projects");
   const confirmModal = document.getElementById("confirm-modal");
   const confirmMessage = document.getElementById("confirm-message");
@@ -137,6 +142,7 @@ document.addEventListener("DOMContentLoaded", () => {
     projectView.style.display = "block";
     loadNotes();
     loadKv();
+    loadTodo();
     showTab("notepad");
   }
 
@@ -150,14 +156,21 @@ document.addEventListener("DOMContentLoaded", () => {
   // Cambiar pestañas
   tabNotepad.onclick = () => showTab("notepad");
   tabKv.onclick = () => showTab("kv");
+  tabTodo.onclick = () => showTab("todo");
 
   function showTab(tab) {
     if (tab === "notepad") {
       notepadTab.style.display = "block";
       kvTab.style.display = "none";
-    } else {
+      todoTab.style.display = "none";
+    } else if (tab === "kv") {
       notepadTab.style.display = "none";
       kvTab.style.display = "block";
+      todoTab.style.display = "none";
+    } else {
+      notepadTab.style.display = "none";
+      kvTab.style.display = "none";
+      todoTab.style.display = "block";
     }
   }
 
@@ -216,6 +229,62 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // TODO
+  async function loadTodo() {
+    try {
+      const response = await fetch(`/api/projects/${currentProject}/todo`);
+      const todos = await response.json();
+      todoList.innerHTML = "";
+      todos.forEach((todo, index) => {
+        const li = document.createElement("li");
+        li.draggable = true;
+        li.dataset.index = index;
+        li.innerHTML = `<input type="checkbox" ${todo.completed ? "checked" : ""} onchange="toggleTodo(${index})"> <span class="${todo.completed ? "completed" : ""}">${todo.text}</span> <button class="delete-btn" onclick="deleteTodo(${index})">Eliminar</button>`;
+        li.addEventListener('dragstart', handleDragStart);
+        li.addEventListener('dragover', handleDragOver);
+        li.addEventListener('drop', handleDrop);
+        todoList.appendChild(li);
+      });
+    } catch (error) {
+      console.error("Error cargando todo:", error);
+    }
+  }
+
+  let draggedIndex = null;
+
+  function handleDragStart(e) {
+    draggedIndex = parseInt(e.target.dataset.index);
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  }
+
+  async function handleDrop(e) {
+    e.preventDefault();
+    const targetLi = e.target.closest('li');
+    const targetIndex = parseInt(targetLi.dataset.index);
+    if (draggedIndex !== null && draggedIndex !== targetIndex) {
+      try {
+        const response = await fetch(`/api/projects/${currentProject}/todo/reorder`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ from: draggedIndex, to: targetIndex }),
+        });
+        if (response.ok) {
+          loadTodo();
+        } else {
+          console.error("Error reordering:", await response.text());
+        }
+      } catch (error) {
+        console.error("Error reordering todo:", error);
+      }
+    }
+    draggedIndex = null;
+  }
+
   addKvBtn.onclick = async () => {
     const key = keyInput.value.trim();
     const value = valueInput.value.trim();
@@ -233,6 +302,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (error) {
         console.error("Error agregando kv:", error);
+      }
+    }
+  };
+
+  addTodoBtn.onclick = async () => {
+    const text = todoText.value.trim();
+    if (text) {
+      try {
+        const response = await fetch(`/api/projects/${currentProject}/todo`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+        if (response.ok) {
+          todoText.value = "";
+          loadTodo();
+        }
+      } catch (error) {
+        console.error("Error agregando todo:", error);
       }
     }
   };
@@ -269,6 +357,38 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         } catch (error) {
           console.error("Error eliminando kv:", error);
+        }
+      }
+    });
+  };
+
+  window.toggleTodo = async (index) => {
+    try {
+      const response = await fetch(`/api/projects/${currentProject}/todo/${index}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ toggle: true }),
+      });
+      if (response.ok) {
+        loadTodo();
+      }
+    } catch (error) {
+      console.error("Error toggling todo:", error);
+    }
+  };
+
+  window.deleteTodo = async (index) => {
+    showConfirm("¿Eliminar esta tarea?", async (confirmed) => {
+      if (confirmed) {
+        try {
+          const response = await fetch(`/api/projects/${currentProject}/todo/${index}`, {
+            method: "DELETE",
+          });
+          if (response.ok) {
+            loadTodo();
+          }
+        } catch (error) {
+          console.error("Error eliminando todo:", error);
         }
       }
     });
@@ -315,15 +435,12 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   window.deleteProject = async (projectName) => {
-    console.log("Eliminando proyecto:", projectName);
     showConfirm("¿Eliminar el proyecto '" + projectName + "' y todos sus datos?", async (confirmed) => {
-      console.log("Confirmado:", confirmed);
       if (confirmed) {
         try {
           const response = await fetch(`/api/projects/${encodeURIComponent(projectName)}`, {
             method: "DELETE",
           });
-          console.log("Respuesta DELETE:", response.status);
           if (response.ok) {
             loadProjects();
             if (currentProject === projectName) {

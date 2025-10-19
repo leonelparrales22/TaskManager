@@ -112,6 +112,19 @@ nav button {
     background: #c82333;
 }
 
+.completed {
+    text-decoration: line-through;
+    color: #6c757d;
+}
+
+li button {
+    margin: 0 2px;
+}
+
+li[draggable="true"] {
+    cursor: move;
+}
+
 .modal {
     position: fixed;
     top: 0;
