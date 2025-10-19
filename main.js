@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, shell } = require("electron");
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -16,6 +16,19 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
+  });
+
+  // Abrir enlaces externos en el navegador predeterminado
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (url.startsWith('http') && !url.includes('localhost:3000')) {
+      event.preventDefault();
+      shell.openExternal(url);
+    }
   });
 
   // Iniciar servidor Express
