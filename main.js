@@ -67,8 +67,8 @@ function createWindow() {
       projects[index] = newName;
       writeProjects(projects);
       // Renombrar archivos
-      const oldNotes = path.join(DATA_DIR, `notes_${oldName}.txt`);
-      const newNotes = path.join(DATA_DIR, `notes_${newName}.txt`);
+      const oldNotes = path.join(DATA_DIR, `notes_${oldName}.md`);
+      const newNotes = path.join(DATA_DIR, `notes_${newName}.md`);
       if (fs.existsSync(oldNotes)) {
         fs.renameSync(oldNotes, newNotes);
       }
@@ -91,7 +91,7 @@ function createWindow() {
       projects.splice(index, 1);
       writeProjects(projects);
       // Eliminar archivos
-      const notesFile = path.join(DATA_DIR, `notes_${name}.txt`);
+      const notesFile = path.join(DATA_DIR, `notes_${name}.md`);
       if (fs.existsSync(notesFile)) {
         fs.unlinkSync(notesFile);
       }
@@ -115,7 +115,7 @@ function createWindow() {
 
   serverApp.get("/api/projects/:name/notes", (req, res) => {
     const { name } = req.params;
-    const notesFile = path.join(DATA_DIR, `notes_${name}.txt`);
+    const notesFile = path.join(DATA_DIR, `notes_${name}.md`);
     if (fs.existsSync(notesFile)) {
       res.send(fs.readFileSync(notesFile, "utf8"));
     } else {
@@ -126,7 +126,7 @@ function createWindow() {
   serverApp.post("/api/projects/:name/notes", (req, res) => {
     const { name } = req.params;
     const { content } = req.body;
-    const notesFile = path.join(DATA_DIR, `notes_${name}.txt`);
+    const notesFile = path.join(DATA_DIR, `notes_${name}.md`);
     fs.writeFileSync(notesFile, content);
     res.json({ message: "Notas guardadas" });
   });

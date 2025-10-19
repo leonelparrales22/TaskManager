@@ -73,8 +73,15 @@ input {
     border-radius: 4px;
 }
 
+#todo-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 #todo-text {
-    width: calc(100% - 10px);
+    flex: 1;
+    width: auto;
 }
 
 .tab-content {

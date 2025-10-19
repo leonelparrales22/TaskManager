@@ -40,6 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let confirmCallback = null;
   let promptCallback = null;
   let alertCallback = null;
+  let simplemde = null;
 
   function showConfirm(message, callback) {
     confirmMessage.textContent = message;
@@ -183,7 +184,11 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch(`/api/projects/${currentProject}/notes`);
       const notes = await response.text();
-      notesTextarea.value = notes;
+      if (!simplemde) {
+        simplemde = new SimpleMDE({ element: notesTextarea });
+        simplemde.codemirror.on("change", debounceSave);
+      }
+      simplemde.value(notes);
     } catch (error) {
       console.error("Error cargando notas:", error);
     }
@@ -195,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch(`/api/projects/${currentProject}/notes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: notesTextarea.value }),
+        body: JSON.stringify({ content: simplemde.value() }),
       });
       if (response.ok) {
         console.log("Notas guardadas automáticamente.");
@@ -213,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Event listener para auto-guardado
-  notesTextarea.addEventListener("input", debounceSave);
+  // notesTextarea.addEventListener("input", debounceSave); // Removed for SimpleMDE
 
   saveNotesBtn.onclick = saveNotes;
 
