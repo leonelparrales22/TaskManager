@@ -169,6 +169,21 @@ input:focus {
   flex: 0 0 auto;
 }
 
+#todo-form {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  align-items: center;
+}
+
+#todo-text {
+  flex: 1;
+}
+
+#todo-form button {
+  flex: 0 0 auto;
+}
+
 .tab-content {
   margin-top: 30px;
 }
