@@ -118,6 +118,11 @@ li:hover {
   background: rgba(74, 144, 226, 0.1);
 }
 
+.project-actions {
+  display: flex;
+  gap: 10px;
+}
+
 #pending-list li, #completed-list li {
   justify-content: space-between;
 }

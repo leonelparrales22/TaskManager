@@ -98,6 +98,8 @@ document.addEventListener("DOMContentLoaded", () => {
         li.className = "project-item";
         li.textContent = project;
         li.onclick = () => selectProject(project);
+        const actionsDiv = document.createElement("div");
+        actionsDiv.className = "project-actions";
         const editBtn = document.createElement("button");
         editBtn.innerHTML = '<i class="fas fa-edit"></i> Editar';
         editBtn.onclick = (e) => {
@@ -111,8 +113,9 @@ document.addEventListener("DOMContentLoaded", () => {
           e.stopPropagation();
           deleteProject(project);
         };
-        li.appendChild(editBtn);
-        li.appendChild(deleteBtn);
+        actionsDiv.appendChild(editBtn);
+        actionsDiv.appendChild(deleteBtn);
+        li.appendChild(actionsDiv);
         projectList.appendChild(li);
       });
     } catch (error) {
