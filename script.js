@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let confirmCallback = null;
   let promptCallback = null;
   let alertCallback = null;
-  let simplemde = null;
+  let editor = null;
 
   function showConfirm(message, callback) {
     confirmMessage.textContent = message;
@@ -184,45 +184,16 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch(`/api/projects/${currentProject}/notes`);
       const notes = await response.text();
-      if (!simplemde) {
-        simplemde = new SimpleMDE({ element: notesTextarea });
-        simplemde.codemirror.on("change", debounceSave);
-        // Add slash commands
-        simplemde.codemirror.on("keydown", (cm, e) => {
-          if (e.key === "/" && cm.getLine(cm.getCursor().line).trim() === "") {
-            e.preventDefault(); // Don't insert /
-            // Wait for next key
-            let nextKeyHandler = (cm2, e2) => {
-              if (e2.key === "h" || e2.key === "1") {
-                e2.preventDefault();
-                cm.replaceSelection("# ");
-              } else if (e2.key === "2") {
-                e2.preventDefault();
-                cm.replaceSelection("## ");
-              } else if (e2.key === "3") {
-                e2.preventDefault();
-                cm.replaceSelection("### ");
-              } else if (e2.key === "c") {
-                e2.preventDefault();
-                cm.replaceSelection("```\n\n```");
-                cm.setCursor(cm.getCursor().line - 1, 0);
-              } else if (e2.key === "l") {
-                e2.preventDefault();
-                cm.replaceSelection("- ");
-              } else if (e2.key === "q") {
-                e2.preventDefault();
-                cm.replaceSelection("> ");
-              } else {
-                // Insert the key
-                return;
-              }
-              simplemde.codemirror.off("keydown", nextKeyHandler);
-            };
-            simplemde.codemirror.on("keydown", nextKeyHandler);
-          }
+      if (!editor) {
+        editor = new toastui.Editor({
+          el: document.querySelector('#editor'),
+          height: '500px',
+          initialEditType: 'markdown',
+          previewStyle: 'vertical'
         });
+        editor.on('change', debounceSave);
       }
-      simplemde.value(notes);
+      editor.setMarkdown(notes);
     } catch (error) {
       console.error("Error cargando notas:", error);
     }
@@ -231,10 +202,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Función para guardar notas
   async function saveNotes() {
     try {
+      const notes = editor.getMarkdown();
       const response = await fetch(`/api/projects/${currentProject}/notes`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: simplemde.value() }),
+        headers: { "Content-Type": "text/plain" },
+        body: notes,
       });
       if (response.ok) {
         console.log("Notas guardadas automáticamente.");

@@ -22,6 +22,7 @@ function createWindow() {
   const serverApp = express();
   serverApp.use(cors());
   serverApp.use(bodyParser.json());
+  serverApp.use(bodyParser.text());
 
   const DATA_DIR = path.join(process.cwd(), "data");
   if (!fs.existsSync(DATA_DIR)) {
@@ -125,8 +126,8 @@ function createWindow() {
 
   serverApp.post("/api/projects/:name/notes", (req, res) => {
     const { name } = req.params;
-    const { content } = req.body;
-    const notesFile = path.join(DATA_DIR, `notes_${name}.json`);
+    const content = req.body;
+    const notesFile = path.join(DATA_DIR, `notes_${name}.md`);
     fs.writeFileSync(notesFile, content);
     res.json({ message: "Notas guardadas" });
   });

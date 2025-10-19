@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestor de Apuntes</title>
-    <link rel="stylesheet" href="https://unpkg.com/simplemde@1.11.2/dist/simplemde.min.css" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
@@ -28,7 +28,7 @@
           <button id="tab-todo">TODO</button>
         </nav>
         <div id="notepad-tab" class="tab-content">
-          <textarea id="notes" placeholder="Escribe tus notas aquí..."></textarea>
+          <div id="editor"></div>
           <button id="save-notes">Guardar Notas</button>
         </div>
         <div id="kv-tab" class="tab-content" style="display: none">
@@ -73,6 +73,6 @@
       </div>
     </div>
     <script src="script.js"></script>
-    <script src="https://unpkg.com/simplemde@1.11.2/dist/simplemde.min.js"></script>
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
   </body>
 </html>
