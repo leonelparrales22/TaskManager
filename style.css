@@ -125,6 +125,11 @@ li[draggable="true"] {
     cursor: move;
 }
 
+input[type="checkbox"] {
+    transform: scale(1.5);
+    margin-right: 10px;
+}
+
 .modal {
     position: fixed;
     top: 0;

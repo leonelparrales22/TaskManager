@@ -17,7 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const kvList = document.getElementById("kv-list");
   const todoText = document.getElementById("todo-text");
   const addTodoBtn = document.getElementById("add-todo");
-  const todoList = document.getElementById("todo-list");
+  const pendingList = document.getElementById("pending-list");
+  const completedList = document.getElementById("completed-list");
   const backToProjectsBtn = document.getElementById("back-to-projects");
   const confirmModal = document.getElementById("confirm-modal");
   const confirmMessage = document.getElementById("confirm-message");
@@ -234,18 +235,23 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch(`/api/projects/${currentProject}/todo`);
       const todos = await response.json();
-      todoList.innerHTML = "";
+      pendingList.innerHTML = "";
+      completedList.innerHTML = "";
       todos.forEach((todo, index) => {
         const li = document.createElement("li");
-        li.draggable = true;
-        li.dataset.index = index;
         li.innerHTML = `<input type="checkbox" ${todo.completed ? "checked" : ""} onchange="toggleTodo(${index})"> <span class="${todo.completed ? "completed" : ""}">${
           todo.text
         }</span> <button class="delete-btn" onclick="deleteTodo(${index})">Eliminar</button>`;
-        li.addEventListener("dragstart", handleDragStart);
-        li.addEventListener("dragover", handleDragOver);
-        li.addEventListener("drop", handleDrop);
-        todoList.appendChild(li);
+        if (!todo.completed) {
+          li.draggable = true;
+          li.dataset.index = index;
+          li.addEventListener("dragstart", handleDragStart);
+          li.addEventListener("dragover", handleDragOver);
+          li.addEventListener("drop", handleDrop);
+          pendingList.appendChild(li);
+        } else {
+          completedList.appendChild(li);
+        }
       });
     } catch (error) {
       console.error("Error cargando todo:", error);
@@ -267,6 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function handleDrop(e) {
     e.preventDefault();
     const targetLi = e.target.closest("li");
+    if (!targetLi || !targetLi.closest('#pending-list')) return;
     const targetIndex = parseInt(targetLi.dataset.index);
     if (draggedIndex !== null && draggedIndex !== targetIndex) {
       try {
