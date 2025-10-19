@@ -78,17 +78,16 @@ function createWindow() {
     }
   });
 
-  serverApp.put("/api/projects/:name/status", (req, res) => {
-    const { name } = req.params;
-    const { completed } = req.body;
+  serverApp.put("/api/projects/reorder", (req, res) => {
+    const { from, to } = req.body;
     const projects = readProjects();
-    const project = projects.find((p) => p.name === name);
-    if (project) {
-      project.completed = completed;
+    if (projects[from] && projects[to] !== undefined) {
+      const [moved] = projects.splice(from, 1);
+      projects.splice(to, 0, moved);
       writeProjects(projects);
-      res.json({ message: `Proyecto ${completed ? "finalizado" : "reactivado"}` });
+      res.json({ message: "Proyectos reordenados" });
     } else {
-      res.status(404).json({ message: "Proyecto no encontrado" });
+      res.status(404).json({ message: "Índices inválidos" });
     }
   });
 

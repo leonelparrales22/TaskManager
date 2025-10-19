@@ -99,9 +99,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Populate active projects
       projectList.innerHTML = "";
-      for (const project of activeProjects) {
+      for (let index = 0; index < activeProjects.length; index++) {
+        const project = activeProjects[index];
         const li = document.createElement("li");
         li.className = "project-item";
+        li.draggable = true;
+        li.dataset.index = index;
 
         // Fetch pending tasks count
         let pendingCount = 0;
@@ -115,6 +118,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         li.textContent = project.name;
         li.onclick = () => selectProject(project.name);
+        li.addEventListener("dragstart", handleDragStart);
+        li.addEventListener("dragover", handleDragOver);
+        li.addEventListener("drop", handleDrop);
         const actionsDiv = document.createElement("div");
         actionsDiv.className = "project-actions";
         if (pendingCount > 0) {
@@ -378,22 +384,22 @@ document.addEventListener("DOMContentLoaded", () => {
   async function handleDrop(e) {
     e.preventDefault();
     const targetLi = e.target.closest("li");
-    if (!targetLi || !targetLi.closest("#pending-list")) return;
+    if (!targetLi || !targetLi.closest("#project-list")) return;
     const targetIndex = parseInt(targetLi.dataset.index);
     if (draggedIndex !== null && draggedIndex !== targetIndex) {
       try {
-        const response = await fetch(`/api/projects/${currentProject}/todo/reorder`, {
+        const response = await fetch("/api/projects/reorder", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ from: draggedIndex, to: targetIndex }),
         });
         if (response.ok) {
-          loadTodo();
+          loadProjects();
         } else {
-          console.error("Error reordering:", await response.text());
+          console.error("Error reordering projects:", await response.text());
         }
       } catch (error) {
-        console.error("Error reordering todo:", error);
+        console.error("Error reordering projects:", error);
       }
     }
     draggedIndex = null;
