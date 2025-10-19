@@ -273,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function handleDrop(e) {
     e.preventDefault();
     const targetLi = e.target.closest("li");
-    if (!targetLi || !targetLi.closest('#pending-list')) return;
+    if (!targetLi || !targetLi.closest("#pending-list")) return;
     const targetIndex = parseInt(targetLi.dataset.index);
     if (draggedIndex !== null && draggedIndex !== targetIndex) {
       try {

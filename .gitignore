@@ -111,6 +111,5 @@ output/
 dist/
 release/
 
-# Electron
-app/dist/
-app/build/
+# User data
+data/
