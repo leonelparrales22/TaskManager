@@ -78,16 +78,48 @@ function createWindow() {
     }
   });
 
+  serverApp.put("/api/projects/:name/status", (req, res) => {
+    const { name } = req.params;
+    const { completed } = req.body;
+    const projects = readProjects();
+    const project = projects.find((p) => p.name === name);
+    if (project) {
+      project.completed = completed;
+      writeProjects(projects);
+      res.json({ message: `Proyecto ${completed ? "finalizado" : "reactivado"}` });
+    } else {
+      res.status(404).json({ message: "Proyecto no encontrado" });
+    }
+  });
+
   serverApp.put("/api/projects/reorder", (req, res) => {
     const { from, to } = req.body;
     const projects = readProjects();
-    if (projects[from] && projects[to] !== undefined) {
-      const [moved] = projects.splice(from, 1);
-      projects.splice(to, 0, moved);
-      writeProjects(projects);
-      res.json({ message: "Proyectos reordenados" });
+    const activeProjects = projects.filter((p) => !p.completed);
+    if (from >= 0 && from < activeProjects.length && to >= 0 && to < activeProjects.length) {
+      // Find the actual indices in the full projects array
+      let fromIndex = -1;
+      let toIndex = -1;
+      let activeCount = 0;
+
+      for (let i = 0; i < projects.length; i++) {
+        if (!projects[i].completed) {
+          if (activeCount === from) fromIndex = i;
+          if (activeCount === to) toIndex = i;
+          activeCount++;
+        }
+      }
+
+      if (fromIndex !== -1 && toIndex !== -1) {
+        const [moved] = projects.splice(fromIndex, 1);
+        projects.splice(toIndex, 0, moved);
+        writeProjects(projects);
+        res.json({ message: "Proyectos reordenados" });
+      } else {
+        res.status(404).json({ message: "Índices no encontrados" });
+      }
     } else {
-      res.status(404).json({ message: "Índices inválidos" });
+      res.status(400).json({ message: "Índices inválidos" });
     }
   });
 

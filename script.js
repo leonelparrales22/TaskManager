@@ -370,6 +370,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   let draggedIndex = null;
+  let draggedProjectIndex = null;
 
   function handleDragStart(e) {
     draggedIndex = parseInt(e.target.dataset.index);
@@ -384,22 +385,45 @@ document.addEventListener("DOMContentLoaded", () => {
   async function handleDrop(e) {
     e.preventDefault();
     const targetLi = e.target.closest("li");
-    if (!targetLi || !targetLi.closest("#project-list")) return;
-    const targetIndex = parseInt(targetLi.dataset.index);
-    if (draggedIndex !== null && draggedIndex !== targetIndex) {
-      try {
-        const response = await fetch("/api/projects/reorder", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ from: draggedIndex, to: targetIndex }),
-        });
-        if (response.ok) {
-          loadProjects();
-        } else {
-          console.error("Error reordering projects:", await response.text());
+    if (!targetLi) return;
+
+    if (targetLi.closest("#pending-list")) {
+      // Drop on TODO items
+      const targetIndex = parseInt(targetLi.dataset.index);
+      if (draggedIndex !== null && draggedIndex !== targetIndex) {
+        try {
+          const response = await fetch(`/api/projects/${currentProject}/todo/reorder`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ from: draggedIndex, to: targetIndex }),
+          });
+          if (response.ok) {
+            loadTodo();
+          } else {
+            console.error("Error reordering todos:", await response.text());
+          }
+        } catch (error) {
+          console.error("Error reordering todos:", error);
         }
-      } catch (error) {
-        console.error("Error reordering projects:", error);
+      }
+    } else if (targetLi.closest("#project-list")) {
+      // Drop on projects
+      const targetIndex = parseInt(targetLi.dataset.index);
+      if (draggedIndex !== null && draggedIndex !== targetIndex) {
+        try {
+          const response = await fetch("/api/projects/reorder", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ from: draggedIndex, to: targetIndex }),
+          });
+          if (response.ok) {
+            loadProjects();
+          } else {
+            console.error("Error reordering projects:", await response.text());
+          }
+        } catch (error) {
+          console.error("Error reordering projects:", error);
+        }
       }
     }
     draggedIndex = null;
