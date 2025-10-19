@@ -35,6 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const alertModal = document.getElementById("alert-modal");
   const alertMessage = document.getElementById("alert-message");
   const alertOk = document.getElementById("alert-ok");
+  const completedProjectList = document.getElementById("completed-project-list");
 
   let currentProject = null;
   let confirmCallback = null;
@@ -92,23 +93,27 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch("/api/projects");
       const projects = await response.json();
+      const activeProjects = projects.filter(p => !p.completed);
+      const completedProjects = projects.filter(p => p.completed);
+
+      // Populate active projects
       projectList.innerHTML = "";
-      for (const project of projects) {
+      for (const project of activeProjects) {
         const li = document.createElement("li");
         li.className = "project-item";
-
+        
         // Fetch pending tasks count
         let pendingCount = 0;
         try {
-          const todoResponse = await fetch(`/api/projects/${encodeURIComponent(project)}/todo`);
+          const todoResponse = await fetch(`/api/projects/${encodeURIComponent(project.name)}/todo`);
           const todos = await todoResponse.json();
-          pendingCount = todos.filter((todo) => !todo.completed).length;
+          pendingCount = todos.filter(todo => !todo.completed).length;
         } catch (error) {
-          console.error(`Error cargando TODO para ${project}:`, error);
+          console.error(`Error cargando TODO para ${project.name}:`, error);
         }
-
-        li.innerHTML = project;
-        li.onclick = () => selectProject(project);
+        
+        li.textContent = project.name;
+        li.onclick = () => selectProject(project.name);
         const actionsDiv = document.createElement("div");
         actionsDiv.className = "project-actions";
         if (pendingCount > 0) {
@@ -117,24 +122,70 @@ document.addEventListener("DOMContentLoaded", () => {
           countSpan.textContent = `(${pendingCount} pendientes)`;
           actionsDiv.appendChild(countSpan);
         }
+        const finalizeBtn = document.createElement("button");
+        finalizeBtn.innerHTML = '<i class="fas fa-check"></i> Finalizar';
+        finalizeBtn.onclick = (e) => {
+          e.stopPropagation();
+          finalizeProject(project.name);
+        };
         const editBtn = document.createElement("button");
         editBtn.innerHTML = '<i class="fas fa-edit"></i> Editar';
         editBtn.onclick = (e) => {
           e.stopPropagation();
-          editProject(project);
+          editProject(project.name);
         };
         const deleteBtn = document.createElement("button");
         deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
         deleteBtn.className = "delete-btn";
         deleteBtn.onclick = (e) => {
           e.stopPropagation();
-          deleteProject(project);
+          deleteProject(project.name);
         };
+        actionsDiv.appendChild(finalizeBtn);
         actionsDiv.appendChild(editBtn);
         actionsDiv.appendChild(deleteBtn);
         li.appendChild(actionsDiv);
         projectList.appendChild(li);
       }
+
+      // Populate completed projects
+      completedProjectList.innerHTML = "";
+      for (const project of completedProjects) {
+        const li = document.createElement("li");
+        li.className = "project-item completed-project";
+        
+        li.textContent = project.name;
+        li.onclick = () => selectProject(project.name);
+        const actionsDiv = document.createElement("div");
+        actionsDiv.className = "project-actions";
+        const reactivateBtn = document.createElement("button");
+        reactivateBtn.innerHTML = '<i class="fas fa-undo"></i> Reactivar';
+        reactivateBtn.onclick = (e) => {
+          e.stopPropagation();
+          reactivateProject(project.name);
+        };
+        const editBtn = document.createElement("button");
+        editBtn.innerHTML = '<i class="fas fa-edit"></i> Editar';
+        editBtn.onclick = (e) => {
+          e.stopPropagation();
+          editProject(project.name);
+        };
+        const deleteBtn = document.createElement("button");
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
+        deleteBtn.className = "delete-btn";
+        deleteBtn.onclick = (e) => {
+          e.stopPropagation();
+          deleteProject(project.name);
+        };
+        actionsDiv.appendChild(reactivateBtn);
+        actionsDiv.appendChild(editBtn);
+        actionsDiv.appendChild(deleteBtn);
+        li.appendChild(actionsDiv);
+        completedProjectList.appendChild(li);
+      }
+
+      // Show completed section if any
+      document.getElementById("completed-projects").style.display = completedProjects.length > 0 ? "block" : "none";
     } catch (error) {
       console.error("Error cargando proyectos:", error);
     }
@@ -169,6 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
     currentProjectTitle.textContent = project;
     document.getElementById("main-header").style.display = "none";
     document.getElementById("projects").style.display = "none";
+    document.getElementById("completed-projects").style.display = "none";
     projectView.style.display = "block";
     loadNotes();
     loadKv();
@@ -182,6 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("projects").style.display = "block";
     projectView.style.display = "none";
     currentProject = null;
+    loadProjects();
   };
 
   // Cambiar pestañas
@@ -516,6 +569,50 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         } catch (error) {
           console.error("Error eliminando proyecto:", error);
+        }
+      }
+    });
+  };
+
+  window.finalizeProject = async (projectName) => {
+    showConfirm("¿Marcar el proyecto '" + projectName + "' como finalizado?", async (confirmed) => {
+      if (confirmed) {
+        try {
+          const response = await fetch(`/api/projects/${encodeURIComponent(projectName)}/status`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ completed: true }),
+          });
+          if (response.ok) {
+            loadProjects();
+          } else {
+            const data = await response.json();
+            showAlert(data.message);
+          }
+        } catch (error) {
+          console.error("Error finalizando proyecto:", error);
+        }
+      }
+    });
+  };
+
+  window.reactivateProject = async (projectName) => {
+    showConfirm("¿Reactivar el proyecto '" + projectName + "'?", async (confirmed) => {
+      if (confirmed) {
+        try {
+          const response = await fetch(`/api/projects/${encodeURIComponent(projectName)}/status`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ completed: false }),
+          });
+          if (response.ok) {
+            loadProjects();
+          } else {
+            const data = await response.json();
+            showAlert(data.message);
+          }
+        } catch (error) {
+          console.error("Error reactivando proyecto:", error);
         }
       }
     });

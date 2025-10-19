@@ -46,7 +46,13 @@ function createWindow() {
 
   function readProjects() {
     if (fs.existsSync(projectsFile)) {
-      return JSON.parse(fs.readFileSync(projectsFile, "utf8"));
+      let projects = JSON.parse(fs.readFileSync(projectsFile, "utf8"));
+      // Migrate old format if needed
+      if (projects.length > 0 && typeof projects[0] === 'string') {
+        projects = projects.map(name => ({ name, completed: false }));
+        writeProjects(projects);
+      }
+      return projects;
     }
     return [];
   }
@@ -63,8 +69,8 @@ function createWindow() {
   serverApp.post("/api/projects", (req, res) => {
     const { name } = req.body;
     const projects = readProjects();
-    if (!projects.includes(name)) {
-      projects.push(name);
+    if (!projects.find(p => p.name === name)) {
+      projects.push({ name, completed: false });
       writeProjects(projects);
       res.status(201).json({ message: "Proyecto creado" });
     } else {
@@ -72,35 +78,24 @@ function createWindow() {
     }
   });
 
-  serverApp.put("/api/projects/:oldName", (req, res) => {
-    const { oldName } = req.params;
-    const { newName } = req.body;
+  serverApp.put("/api/projects/:name/status", (req, res) => {
+    const { name } = req.params;
+    const { completed } = req.body;
     const projects = readProjects();
-    const index = projects.indexOf(oldName);
-    if (index !== -1 && !projects.includes(newName)) {
-      projects[index] = newName;
+    const project = projects.find(p => p.name === name);
+    if (project) {
+      project.completed = completed;
       writeProjects(projects);
-      // Renombrar archivos
-      const oldNotes = path.join(DATA_DIR, `notes_${oldName}.md`);
-      const newNotes = path.join(DATA_DIR, `notes_${newName}.md`);
-      if (fs.existsSync(oldNotes)) {
-        fs.renameSync(oldNotes, newNotes);
-      }
-      const oldKv = path.join(DATA_DIR, `kv_${oldName}.json`);
-      const newKv = path.join(DATA_DIR, `kv_${newName}.json`);
-      if (fs.existsSync(oldKv)) {
-        fs.renameSync(oldKv, newKv);
-      }
-      res.json({ message: "Proyecto renombrado" });
+      res.json({ message: `Proyecto ${completed ? 'finalizado' : 'reactivado'}` });
     } else {
-      res.status(400).json({ message: "Nombre inválido o ya existe" });
+      res.status(404).json({ message: "Proyecto no encontrado" });
     }
   });
 
   serverApp.delete("/api/projects/:name", (req, res) => {
     const { name } = req.params;
     const projects = readProjects();
-    const index = projects.indexOf(name);
+    const index = projects.findIndex(p => p.name === name);
     if (index !== -1) {
       projects.splice(index, 1);
       writeProjects(projects);
@@ -112,10 +107,6 @@ function createWindow() {
       const kvFile = path.join(DATA_DIR, `kv_${name}.json`);
       if (fs.existsSync(kvFile)) {
         fs.unlinkSync(kvFile);
-      }
-      const todoFileDel = path.join(DATA_DIR, `todo_${name}.json`);
-      if (fs.existsSync(todoFileDel)) {
-        fs.unlinkSync(todoFileDel);
       }
       const todoFile = path.join(DATA_DIR, `todo_${name}.json`);
       if (fs.existsSync(todoFile)) {
