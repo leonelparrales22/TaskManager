@@ -376,7 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const li = document.createElement("li");
         li.innerHTML = `<div class="task-content"><input type="checkbox" ${todo.completed ? "checked" : ""} onchange="toggleTodo(${index})"> <span class="${todo.completed ? "completed" : ""}">${
           todo.text
-        }</span></div> <button class="delete-btn" onclick="deleteTodo(${index})"><i class="fas fa-trash"></i> Eliminar</button>`;
+        }</span></div> <button onclick="editTodo(${index})"><i class="fas fa-edit"></i> Editar</button> <button class="delete-btn" onclick="deleteTodo(${index})"><i class="fas fa-trash"></i> Eliminar</button>`;
         if (!todo.completed) {
           li.draggable = true;
           li.dataset.index = index;
@@ -558,6 +558,36 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (error) {
       console.error("Error toggling todo:", error);
+    }
+  };
+
+  window.editTodo = async (index) => {
+    try {
+      const response = await fetch(`/api/projects/${currentProject}/todo`);
+      const todos = await response.json();
+      const currentText = todos[index].text;
+
+      showPrompt("Editar tarea:", currentText, async (newText) => {
+        if (newText !== null && newText.trim() !== "" && newText !== currentText) {
+          try {
+            const updateResponse = await fetch(`/api/projects/${currentProject}/todo/${index}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ text: newText }),
+            });
+            if (updateResponse.ok) {
+              loadTodo();
+            } else {
+              const data = await updateResponse.json();
+              showAlert(data.message);
+            }
+          } catch (error) {
+            console.error("Error editando tarea:", error);
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error obteniendo tarea:", error);
     }
   };
 

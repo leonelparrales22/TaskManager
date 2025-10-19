@@ -269,13 +269,16 @@ function createWindow() {
 
   serverApp.put("/api/projects/:name/todo/:index", (req, res) => {
     const { name, index } = req.params;
-    const { toggle } = req.body;
+    const { toggle, text } = req.body;
     const todoFile = path.join(DATA_DIR, `todo_${name}.json`);
     if (fs.existsSync(todoFile)) {
       let todos = JSON.parse(fs.readFileSync(todoFile, "utf8"));
       if (todos[index]) {
-        if (toggle) {
+        if (toggle !== undefined) {
           todos[index].completed = !todos[index].completed;
+        }
+        if (text !== undefined) {
+          todos[index].text = text;
         }
         fs.writeFileSync(todoFile, JSON.stringify(todos, null, 2));
         res.json({ message: "Tarea actualizada" });
