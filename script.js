@@ -239,10 +239,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const li = document.createElement("li");
         li.draggable = true;
         li.dataset.index = index;
-        li.innerHTML = `<input type="checkbox" ${todo.completed ? "checked" : ""} onchange="toggleTodo(${index})"> <span class="${todo.completed ? "completed" : ""}">${todo.text}</span> <button class="delete-btn" onclick="deleteTodo(${index})">Eliminar</button>`;
-        li.addEventListener('dragstart', handleDragStart);
-        li.addEventListener('dragover', handleDragOver);
-        li.addEventListener('drop', handleDrop);
+        li.innerHTML = `<input type="checkbox" ${todo.completed ? "checked" : ""} onchange="toggleTodo(${index})"> <span class="${todo.completed ? "completed" : ""}">${
+          todo.text
+        }</span> <button class="delete-btn" onclick="deleteTodo(${index})">Eliminar</button>`;
+        li.addEventListener("dragstart", handleDragStart);
+        li.addEventListener("dragover", handleDragOver);
+        li.addEventListener("drop", handleDrop);
         todoList.appendChild(li);
       });
     } catch (error) {
@@ -254,17 +256,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function handleDragStart(e) {
     draggedIndex = parseInt(e.target.dataset.index);
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.effectAllowed = "move";
   }
 
   function handleDragOver(e) {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
+    e.dataTransfer.dropEffect = "move";
   }
 
   async function handleDrop(e) {
     e.preventDefault();
-    const targetLi = e.target.closest('li');
+    const targetLi = e.target.closest("li");
     const targetIndex = parseInt(targetLi.dataset.index);
     if (draggedIndex !== null && draggedIndex !== targetIndex) {
       try {
