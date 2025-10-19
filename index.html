@@ -5,27 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gestor de Apuntes</title>
     <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <header>
-      <h1>Gestor de Apuntes por Proyecto</h1>
+      <h1><i class="fas fa-tasks"></i> Gestor de Apuntes por Proyecto</h1>
     </header>
     <main>
       <section id="projects">
         <h2>Proyectos</h2>
-        <button id="new-project">Nuevo Proyecto</button>
+        <button id="new-project"><i class="fas fa-plus"></i> Nuevo Proyecto</button>
         <ul id="project-list"></ul>
       </section>
       <section id="project-view" style="display: none">
         <div class="project-header">
           <h2 id="current-project-title"></h2>
-          <button id="back-to-projects">Volver a Proyectos</button>
+          <button id="back-to-projects"><i class="fas fa-arrow-left"></i> Volver a Proyectos</button>
         </div>
         <nav>
-          <button id="tab-notepad">Notepad</button>
-          <button id="tab-kv">Llave-Valor</button>
-          <button id="tab-todo">TODO</button>
+          <button id="tab-notepad"><i class="fas fa-sticky-note"></i> Notepad</button>
+          <button id="tab-kv"><i class="fas fa-key"></i> Llave-Valor</button>
+          <button id="tab-todo"><i class="fas fa-check-square"></i> TODO</button>
         </nav>
         <div id="notepad-tab" class="tab-content">
           <div id="editor"></div>
@@ -35,14 +36,14 @@
           <div id="kv-form">
             <input type="text" id="key" placeholder="Llave" />
             <input type="text" id="value" placeholder="Valor" />
-            <button id="add-kv">Agregar</button>
+            <button id="add-kv"><i class="fas fa-plus"></i> Agregar</button>
           </div>
           <ul id="kv-list"></ul>
         </div>
         <div id="todo-tab" class="tab-content" style="display: none">
           <div id="todo-form">
             <input type="text" id="todo-text" placeholder="Nueva tarea" />
-            <button id="add-todo">Agregar</button>
+            <button id="add-todo"><i class="fas fa-plus"></i> Agregar</button>
           </div>
           <h3>Pendientes (<span id="pending-count">0</span>)</h3>
           <ul id="pending-list"></ul>

@@ -97,13 +97,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const li = document.createElement("li");
         li.textContent = project;
         const selectBtn = document.createElement("button");
-        selectBtn.textContent = "Seleccionar";
+        selectBtn.innerHTML = '<i class="fas fa-folder-open"></i> Seleccionar';
         selectBtn.onclick = () => selectProject(project);
         const editBtn = document.createElement("button");
-        editBtn.textContent = "Editar";
+        editBtn.innerHTML = '<i class="fas fa-edit"></i> Editar';
         editBtn.onclick = () => editProject(project);
         const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Eliminar";
+        deleteBtn.innerHTML = '<i class="fas fa-trash"></i> Eliminar';
         deleteBtn.className = "delete-btn";
         deleteBtn.onclick = () => deleteProject(project);
         li.appendChild(selectBtn);
@@ -233,7 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
       kvList.innerHTML = "";
       Object.entries(kv).forEach(([key, value]) => {
         const li = document.createElement("li");
-        li.innerHTML = `<strong class="kv-key">${key}:</strong> <span class="kv-value">${value}</span> <button onclick="copyKv('${key}')">Copiar</button> <button onclick="editKv('${key}')">Editar</button> <button class="delete-btn" onclick="deleteKv('${key}')">Eliminar</button>`;
+        li.innerHTML = `<strong class="kv-key">${key}:</strong> <span class="kv-value">${value}</span> <button onclick="copyKv('${key}')"><i class="fas fa-copy"></i> Copiar</button> <button onclick="editKv('${key}')"><i class="fas fa-edit"></i> Editar</button> <button class="delete-btn" onclick="deleteKv('${key}')"><i class="fas fa-trash"></i> Eliminar</button>`;
         kvList.appendChild(li);
       });
     } catch (error) {
@@ -254,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const li = document.createElement("li");
         li.innerHTML = `<div class="task-content"><input type="checkbox" ${todo.completed ? "checked" : ""} onchange="toggleTodo(${index})"> <span class="${todo.completed ? "completed" : ""}">${
           todo.text
-        }</span></div> <button class="delete-btn" onclick="deleteTodo(${index})">Eliminar</button>`;
+        }</span></div> <button class="delete-btn" onclick="deleteTodo(${index})"><i class="fas fa-trash"></i> Eliminar</button>`;
         if (!todo.completed) {
           li.draggable = true;
           li.dataset.index = index;
