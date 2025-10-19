@@ -249,9 +249,9 @@ document.addEventListener("DOMContentLoaded", () => {
       completedList.innerHTML = "";
       todos.forEach((todo, index) => {
         const li = document.createElement("li");
-        li.innerHTML = `<input type="checkbox" ${todo.completed ? "checked" : ""} onchange="toggleTodo(${index})"> <span class="${todo.completed ? "completed" : ""}">${
+        li.innerHTML = `<div class="task-content"><input type="checkbox" ${todo.completed ? "checked" : ""} onchange="toggleTodo(${index})"> <span class="${todo.completed ? "completed" : ""}">${
           todo.text
-        }</span> <button class="delete-btn" onclick="deleteTodo(${index})">Eliminar</button>`;
+        }</span></div> <button class="delete-btn" onclick="deleteTodo(${index})">Eliminar</button>`;
         if (!todo.completed) {
           li.draggable = true;
           li.dataset.index = index;

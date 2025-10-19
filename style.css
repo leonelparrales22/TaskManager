@@ -57,6 +57,10 @@ li {
     align-items: center;
 }
 
+#pending-list li, #completed-list li {
+    justify-content: space-between;
+}
+
 textarea {
     width: 100%;
     height: 300px;
@@ -126,6 +130,12 @@ nav button {
 .completed {
     text-decoration: line-through;
     color: #6c757d;
+}
+
+.task-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
 }
 
 li button {
