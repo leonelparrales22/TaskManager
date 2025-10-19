@@ -36,6 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const alertMessage = document.getElementById("alert-message");
   const alertOk = document.getElementById("alert-ok");
   const completedProjectList = document.getElementById("completed-project-list");
+  const toggleCompletedProjects = document.getElementById("toggle-completed-projects");
 
   let currentProject = null;
   let confirmCallback = null;
@@ -185,7 +186,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Show completed section if any
-      document.getElementById("completed-projects").style.display = completedProjects.length > 0 ? "block" : "none";
+      if (completedProjects.length > 0) {
+        document.getElementById("completed-projects").style.display = "block";
+        completedProjectList.style.display = "none";
+      } else {
+        document.getElementById("completed-projects").style.display = "none";
+      }
     } catch (error) {
       console.error("Error cargando proyectos:", error);
     }
@@ -432,13 +438,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  toggleCompleted.onclick = () => {
-    if (completedList.style.display === "none") {
-      completedList.style.display = "block";
-      toggleCompleted.textContent = "Ocultar";
+  toggleCompletedProjects.onclick = () => {
+    if (completedProjectList.style.display === "none") {
+      completedProjectList.style.display = "block";
+      toggleCompletedProjects.textContent = "Ocultar";
     } else {
-      completedList.style.display = "none";
-      toggleCompleted.textContent = "Mostrar";
+      completedProjectList.style.display = "none";
+      toggleCompletedProjects.textContent = "Mostrar";
     }
   };
 
@@ -619,4 +625,14 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   loadProjects();
+
+  toggleCompletedProjects.onclick = () => {
+    if (completedProjectList.style.display === "none") {
+      completedProjectList.style.display = "block";
+      toggleCompletedProjects.textContent = "Ocultar";
+    } else {
+      completedProjectList.style.display = "none";
+      toggleCompletedProjects.textContent = "Mostrar";
+    }
+  };
 });
